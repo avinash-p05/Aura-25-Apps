@@ -1,19 +1,18 @@
 package com.techelites.attendacemarkingv1.data.repository
 
+
+import android.util.Log
 import com.techelites.attendacemarkingv1.data.preferences.PreferencesManager
 import com.techelites.attendacemarkingv1.network.AuthApiService
 import com.techelites.attendacemarkingv1.network.LoginRequest
-import com.techelites.attendacemarkingv1.utils.Result1
-import android.util.Log
-import com.techelites.attendacemarkingv1.network.MainRequest
 import com.techelites.attendacemarkingv1.network.LoginResponse
+import com.techelites.attendacemarkingv1.utils.Result1
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import retrofit2.Response
-import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AuthRepository @Inject constructor(
     private val authApiService: AuthApiService,
     private val preferencesManager: PreferencesManager
@@ -26,11 +25,14 @@ class AuthRepository @Inject constructor(
                 val response = authApiService.login(LoginRequest(username, password))
                 if (response.isSuccessful && response.body() != null) {
                     val loginResponse = response.body()!!
+                    Log.d(TAG, "Login successful: $loginResponse")
+
                     // Save user information to encrypted preferences
                     saveUserDetails(loginResponse)
                     Result1.Success(loginResponse)
                 } else {
                     val errorMessage = response.errorBody()?.string() ?: "Login failed"
+                    Log.e(TAG, "Login failed: $errorMessage")
                     Result1.Error(Exception(errorMessage))
                 }
             } catch (e: Exception) {
@@ -40,64 +42,19 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    private suspend fun saveUserDetails(loginResponse: LoginResponse) {
-        withContext(Dispatchers.IO) {
-            preferencesManager.apply {
-                // Save token
-                saveToken(loginResponse.token)
+    private fun saveUserDetails(loginResponse: LoginResponse) {
+        // Save token
+        preferencesManager.saveToken(loginResponse.token)
 
-                // Save scanner details
-                saveScannerDetails(loginResponse.scanner)
+        // Save username and role
+        preferencesManager.putString("username", loginResponse.data.username)
+        preferencesManager.putString("role", loginResponse.data.role)
 
-                // Save assigned events
-                saveAssignedEvents(loginResponse.assignedEvents)
+        // Save assigned gates
+        val assignedGatesSet = loginResponse.data.assignedGates.toSet()
+        preferencesManager.putStringSet("assigned_gates", assignedGatesSet)
 
-                // Save scan all events permission
-                saveCanScanAllEvents(loginResponse.canScanAllEvents)
-            }
-        }
-    }
-
-    suspend fun processScannedData(
-        registrationId: String,
-        userId: String,
-        eventId: String,
-        endpoint: String
-    ): Result1<JSONObject> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val token = "Bearer ${preferencesManager.getToken()}"
-                val request = MainRequest(
-                    registrationId = registrationId,
-                    userId = userId,
-                    eventId = eventId
-                )
-
-                val response = when (endpoint) {
-                    "attendance/mark" ->
-                        authApiService.markAttendance(request)
-                    "attendance/unmark" ->
-                        authApiService.unmarkAttendance( request)
-                    "id/collect" ->
-                        authApiService.collectId( request)
-                    "id/return" ->
-                        authApiService.returnId(request)
-                    else ->
-                        authApiService.markAttendance(request) // Default fallback
-                }
-
-                if (response.isSuccessful && response.body() != null) {
-                    val responseBody = response.body()!!.string()
-                    Result1.Success(JSONObject(responseBody))
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    Result1.Error(IOException(errorBody))
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error processing scanned data: ${e.message}", e)
-                Result1.Error(e)
-            }
-        }
+        Log.d(TAG, "Saved user details: username=${loginResponse.data.username}, role=${loginResponse.data.role}, gates=${loginResponse.data.assignedGates}")
     }
 
     fun isLoggedIn(): Boolean {
@@ -108,5 +65,13 @@ class AuthRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             preferencesManager.clearAll()
         }
+    }
+
+    fun getUserInfo(): Triple<String, String, List<String>> {
+        return Triple(
+            preferencesManager.getUsername(),
+            preferencesManager.getRole(),
+            preferencesManager.getAssignedGates()
+        )
     }
 }

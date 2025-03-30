@@ -5,7 +5,15 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,13 +24,29 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
@@ -35,20 +59,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.techelites.attendacemarkingv1.R
-import com.techelites.attendacemarkingv1.ui.theme.Blue500
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    username: String,
-    password: String,
-    isLoading: Boolean,
-    errorMessage: String,
-    onUsernameChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit
+    viewModel: AuthViewModel
 ) {
+    val authState by viewModel.authState.collectAsState()
+
     val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
     val usernameFocusRequester = remember { FocusRequester() }
@@ -68,7 +86,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    brush = Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                             MaterialTheme.colorScheme.background
@@ -98,12 +116,11 @@ fun LoginScreen(
             )
 
             Text(
-                text = "Secure Eventify",
+                text = "Aura Security",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
-
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -130,8 +147,8 @@ fun LoginScreen(
 
                     // Username field
                     OutlinedTextField(
-                        value = username,
-                        onValueChange = onUsernameChange,
+                        value = authState.username,
+                        onValueChange = viewModel::onUsernameChange,
                         label = { Text("Username") },
                         placeholder = { Text("Enter your username") },
                         singleLine = true,
@@ -143,8 +160,8 @@ fun LoginScreen(
                             )
                         },
                         trailingIcon = {
-                            if (username.isNotEmpty()) {
-                                IconButton(onClick = { onUsernameChange("") }) {
+                            if (authState.username.isNotEmpty()) {
+                                IconButton(onClick = { viewModel.onUsernameChange("") }) {
                                     Icon(
                                         imageVector = Icons.Filled.Clear,
                                         contentDescription = "Clear",
@@ -169,8 +186,8 @@ fun LoginScreen(
 
                     // Password field
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = onPasswordChange,
+                        value = authState.password,
+                        onValueChange = viewModel::onPasswordChange,
                         label = { Text("Password") },
                         placeholder = { Text("Enter your password") },
                         singleLine = true,
@@ -198,7 +215,7 @@ fun LoginScreen(
                         keyboardActions = androidx.compose.foundation.text.KeyboardActions(
                             onDone = {
                                 focusManager.clearFocus()
-                                onLoginClick()
+                                viewModel.login()
                             }
                         ),
                         modifier = Modifier
@@ -206,24 +223,21 @@ fun LoginScreen(
                             .focusRequester(passwordFocusRequester)
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-
                     Spacer(modifier = Modifier.height(24.dp))
 
                     // Login button
                     Button(
                         onClick = {
                             focusManager.clearFocus()
-                            onLoginClick()
+                            viewModel.login()
                         },
-                        enabled = !isLoading && username.isNotBlank() && password.isNotBlank(),
+                        enabled = !authState.isLoading && authState.username.isNotBlank() && authState.password.isNotBlank(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        if (isLoading) {
+                        if (authState.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 color = MaterialTheme.colorScheme.onPrimary,
@@ -245,7 +259,7 @@ fun LoginScreen(
 
             // Error message
             AnimatedVisibility(
-                visible = errorMessage.isNotBlank(),
+                visible = authState.errorMessage.isNotBlank(),
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -257,7 +271,7 @@ fun LoginScreen(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = errorMessage,
+                        text = authState.errorMessage,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,
                         modifier = Modifier

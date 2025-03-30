@@ -9,64 +9,54 @@ import retrofit2.http.POST
 
 // Login Request & Response
 data class LoginRequest(val username: String, val password: String)
+
 data class LoginResponse(
-    val message: String,
-    val scanner: Scanner,
-    val assignedEvents: List<Event>,
-    val canScanAllEvents: Boolean,
-    val token: String
+    val success: Boolean,
+    val token: String,
+    val data: UserData
 )
 
-data class Scanner(
-    val id: String,
-    val name: String,
+data class UserData(
     val username: String,
-    val role: String
+    val role: String,
+    val assignedGates: List<String>
 )
 
-data class Event(
-    val _id: String,
-    val id: Int,
-    val name: String,
-    val date: String,
-    val venue: String
-)
-
-// Generic Request for all API endpoints
-data class MainRequest(
-    val registrationId: String,
-    val userId: String,
-    val eventId: String
-)
+// Entry & Exit Request
+data class EntryExitRequest(val identifier: String)
 
 interface AuthApiService {
+
     // Login API
     @Headers("Content-Type: application/json")
-    @POST("scan/login")
+    @POST("admin/admin/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    // Mark Attendance
-    @POST("scan/attendance/mark")
-    suspend fun markAttendance(
-        @Body request: MainRequest
+    // Main Gate Entry - Return raw response body for easier JSON parsing
+    @POST("entry/entry/main-gate")
+    suspend fun mainGateEntry(
+        @Header("Authorization") token: String,
+        @Body request: EntryExitRequest
     ): Response<ResponseBody>
 
-    // Unmark Attendance
-    @POST("scan/attendance/unmark")
-    suspend fun unmarkAttendance(
-        @Body request: MainRequest
+    // Concert Gate Entry
+    @POST("entry/entry/concert-area")
+    suspend fun concertGateEntry(
+        @Header("Authorization") token: String,
+        @Body request: EntryExitRequest
     ): Response<ResponseBody>
 
-    // ID Collection APIs
-    // Collect ID
-    @POST("scan/mark-id-card/collect")
-    suspend fun collectId(
-        @Body request: MainRequest
+    // Main Gate Exit
+    @POST("entry/exit/main-gate")
+    suspend fun mainGateExit(
+        @Header("Authorization") token: String,
+        @Body request: EntryExitRequest
     ): Response<ResponseBody>
 
-    // Return ID
-    @POST("scan/mark-id-card/return")
-    suspend fun returnId(
-        @Body request: MainRequest
+    // Concert Gate Exit
+    @POST("entry/exit/concert-area")
+    suspend fun concertGateExit(
+        @Header("Authorization") token: String,
+        @Body request: EntryExitRequest
     ): Response<ResponseBody>
 }

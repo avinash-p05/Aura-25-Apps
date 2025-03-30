@@ -37,6 +37,10 @@
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.main.scanner.ScannerActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

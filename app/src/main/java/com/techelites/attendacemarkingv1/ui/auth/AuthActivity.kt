@@ -1,9 +1,5 @@
 package com.techelites.attendacemarkingv1.ui.auth
 
-import com.techelites.attendacemarkingv1.ui.main.MainActivity
-import com.techelites.attendacemarkingv1.ui.theme.AuraSecurityTheme
-
-
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,6 +12,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.techelites.attendacemarkingv1.ui.main.MainActivity
+import com.techelites.attendacemarkingv1.ui.theme.AuraSecurityTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -39,18 +37,7 @@ class AuthActivity : ComponentActivity() {
                         }
                     }
 
-                    LoginScreen(
-                        username = authState.username,
-                        password = authState.password,
-                        isLoading = authState.isLoading,
-                        errorMessage = authState.errorMessage,
-                        onUsernameChange = viewModel::onUsernameChange,
-                        onPasswordChange = viewModel::onPasswordChange,
-                        onLoginClick = viewModel::login,
-                        onForgotPasswordClick = {
-                            // TODO: Implement forgot password
-                        }
-                    )
+                    LoginScreen(viewModel = viewModel)
                 }
             }
         }
