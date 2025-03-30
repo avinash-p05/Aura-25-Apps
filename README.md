@@ -3,7 +3,7 @@
 <div align="center">
   <img src="app/src/main/res/drawable/logo.png" alt="Aura Security Logo" width="200"/>
   <br>
-  <p><strong>Event Entry & Security Management System</strong></p>
+  <p><strong>Event Entry/Exit Management System</strong></p>
 </div>
 
 ## 📋 Overview
@@ -76,14 +76,6 @@ app/src/main/java/com/techelites/attendacemarkingv1/
 
 4. Build and run the application on your device or emulator
 
-## 📱 Screenshots
-
-<div align="center">
-  <img src="screenshots/login.png" alt="Login Screen" width="200"/>
-  <img src="screenshots/home.png" alt="Home Screen" width="200"/>
-  <img src="screenshots/scanner.png" alt="Scanner Screen" width="200"/>
-  <img src="screenshots/profile.png" alt="Profile Screen" width="200"/>
-</div>
 
 ## 🔑 Key Components
 
