@@ -157,14 +157,11 @@ interface AuthApiService {
 - **🔐 Token-based Authentication**: Secure API access
 - **🛡️ Encrypted Storage**: All sensitive information is encrypted using AES256
 - **📱 Permission Handling**: Runtime permissions for camera access
-- **👥 Role-based Access Control**: Different user roles have tailored access to features
 
 ## 🚀 Future Enhancements
 
 - **📶 Offline Support**: Function with limited connectivity
 - **📊 Analytics Dashboard**: Track entry/exit statistics
-- **🌐 Multi-language Support**: Internationalization
-- **🌙 Dark Mode**: Enhanced UI theming options
 - **📲 Push Notifications**: Real-time alerts for security staff
 
 ## 📄 License
@@ -180,5 +177,5 @@ interface AuthApiService {
 ---
 
 <div align="center">
-  <p>Made with ❤️ by Tech Elites</p>
+  <p>Made with ❤️ by Tech Team KLS GIT</p>
 </div>
