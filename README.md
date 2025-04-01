@@ -172,7 +172,8 @@ interface AuthApiService {
 
 ## 👥 Contributors
 
-- Avinash P - Developer
+- Avinash Pauskar - Developer
+- Ganesh Kugaji - Developer
 
 ---
 
