@@ -32,6 +32,8 @@
             android:name=".ui.auth.AuthActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+<!-- Changes By Ganesh Kugaji  -->
+        
 
         <!-- Main activity -->
         <activity
